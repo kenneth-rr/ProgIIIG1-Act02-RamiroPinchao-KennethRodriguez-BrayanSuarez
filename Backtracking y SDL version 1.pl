@@ -27,3 +27,18 @@ conexionEntre(X, Z, Visitados) :-
     conexion( X, Y, _ ), 
     \+ member(Y, Visitados),
     conexionEntre( Y, Z, [X|Visitados] ).
+
+costoEntre(X, Y, Costo) :- 
+    costoEntre(X, Y, [X], 0, Costo).
+
+costoEntre(X, Y, _, Acumulado, Costo) :- 
+    conexion(X, Y, C),
+    Costo is Acumulado + C,
+    write(X), write(' -> '), write(Y), write(' | Costo total: '), write(Costo), nl.
+
+costoEntre(X, Y, Visitados, Acumulado, Costo) :- 
+    conexion(X, Z, C),
+    \+ member(Z, Visitados),
+    NuevoCosto is Acumulado + C,
+    write(X), write(' -> '), write(Z), write(' | Costo acumulado: '), write(NuevoCosto), nl,
+    costoEntre(Z, Y, [Z|Visitados], NuevoCosto, Costo).
