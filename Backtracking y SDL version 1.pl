@@ -8,26 +8,40 @@ conexion(saskatoon, calgary, 9).
 conexion(regina, saskatoon, 7).
 conexion(regina, winnipeg, 4).
 
+%Regla para saber si un nodo tiene aristas
 tieneAristas(X) :- conexion(X, _, _).
 
-conexionEntre(X, Y, _) :- conexion(X, Y, _).
+%regla para conocer los nodos conectados a una ciudad junto con su costo
+nodosConectados(X,Y, Z) :- conexion(X, Y, Z).
 
-conexionEntre(X, Z, Visitados) :- 
+%reglas para saber si existe una conexion entre X ciudad con Y ciudad
+conexionEntre( X, Y ) :- conexionEntreAux(X,Y, []).
+
+conexionEntreAux(X, Y, _ ) :- conexion(X, Y, _).
+
+conexionEntreAux(X, Z, Visitados) :- 
     conexion(X, Y, _), 
     \+ member(Y, Visitados),   
-    conexionEntre(Y, Z, [X|Visitados]).
-
-costoEntre(X, Y) :- 
-    costoEntreAux(X, Y, [X],  0, Costo), 
-    write('Costo total: '), write(Costo), nl.
+    conexionEntreAux(Y, Z, [X|Visitados]).
 
 
-costoEntreAux(X, Y, _ , CostoAcumulado, CostoFinal) :- 
+%Regla para conocer el costo de ir a Y lugar desde X lugar pasando por Z lugar
+costoEntreConParada(X, Y, Z, Costo) :-
+    costoEntre(X, Z, Costo1),               
+    costoEntre(Z, Y, Costo2),                
+    Costo is Costo1 + Costo2.                
+
+
+%Reglas para conocer el costo de viajar desde X ciudad a Y ciudad
+costoEntre(X, Y, Costo) :- 
+    costoEntre(X, Y, [X], 0, Costo).
+
+costoEntre(X, Y, _, Acumulado, Costo) :- 
     conexion(X, Y, C),
-    CostoFinal is CostoAcumulado + C.
+    Costo is Acumulado + C.
 
-costoEntreAux(X, Y, Visitados, CostoAcumulado, CostoFinal) :- 
+costoEntre(X, Y, Visitados, Acumulado, Costo) :- 
     conexion(X, Z, C),
-    \+ member(Z, [X|Visitados]),  
-    NuevoCosto is CostoAcumulado + C,
-    costoEntreAux(Z, Y, [Z | Visitados ] , NuevoCosto, CostoFinal).
+    \+ member(Z, Visitados),                
+    NuevoCosto is Acumulado + C,
+    costoEntre(Z, Y, [Z|Visitados], NuevoCosto, Costo).
